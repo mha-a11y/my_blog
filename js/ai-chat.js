@@ -149,8 +149,7 @@
     var list = document.getElementById('chat-history-list');
     if (!list) return;
 
-    var uid = getUserId();
-    var filtered = isAdmin ? archives : archives.filter(function (a) { return a.userId === uid; });
+    var filtered = archives;
 
     if (searchQuery) {
       filtered = filtered.filter(function (a) {
