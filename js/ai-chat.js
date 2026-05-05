@@ -351,7 +351,11 @@
       console.log('[autoSave] updating:', currentArchiveId);
       window.BlogData.update('chat-history', currentArchiveId, payload)
         .then(function (r) { console.log('[autoSave] update OK:', r); })
-        .catch(function (e) { console.error('[autoSave] update FAIL:', e); });
+        .catch(function (e) {
+          console.warn('[autoSave] update failed, creating new:', e);
+          currentArchiveId = null;
+          autoSaveToServer();
+        });
     } else {
       payload.id = window.genId();
       console.log('[autoSave] creating:', payload.id);
