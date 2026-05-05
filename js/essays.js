@@ -71,8 +71,8 @@
         '<div class="essay-card-header">' +
           '<span class="essay-date">' + window.formatDate(essay.date) + '</span>' +
           '<div class="essay-card-actions">' +
-            '<button class="btn-edit-sm" data-action="edit" data-id="' + essay.id + '">编辑</button>' +
-            '<button class="btn-delete-sm" data-action="delete" data-id="' + essay.id + '">删除</button>' +
+            '<button class="btn-edit-sm admin-only" data-action="edit" data-id="' + essay.id + '">编辑</button>' +
+            '<button class="btn-delete-sm admin-only" data-action="delete" data-id="' + essay.id + '">删除</button>' +
           '</div>' +
         '</div>' +
         '<h3>' + window.escHtml(essay.title) + '</h3>' +
@@ -141,9 +141,11 @@
       var id = btn.getAttribute('data-id');
 
       if (action === 'edit') {
+        if (!window.requireAdmin()) return;
         var essay = allEssays.find(function (e) { return e.id === id; });
         if (essay) openEditor(essay);
       } else if (action === 'delete') {
+        if (!window.requireAdmin()) return;
         if (confirm('确定删除这篇随笔？')) {
           window.BlogData.remove('essays', id).then(function () {
             allEssays = allEssays.filter(function (e) { return e.id !== id; });
@@ -168,7 +170,7 @@
   }
 
   if (addBtn) {
-    addBtn.addEventListener('click', function () { openEditor(null); });
+    addBtn.addEventListener('click', function () { if (window.requireAdmin()) openEditor(null); });
   }
 
   /* Init */

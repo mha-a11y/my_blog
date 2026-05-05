@@ -110,8 +110,8 @@
         '<div class="msg-card-footer">' +
           '<button class="msg-reply-toggle" data-action="reply-toggle" data-id="' + msg.id + '">' + ICON_REPLY + ' 回复</button>' +
           '<div class="msg-card-actions">' +
-            '<button class="btn-edit-sm" data-action="edit" data-id="' + msg.id + '" title="编辑">' + ICON_EDIT + '</button>' +
-            '<button class="btn-delete-sm" data-action="delete" data-id="' + msg.id + '" title="删除">' + ICON_DELETE + '</button>' +
+            '<button class="btn-edit-sm admin-only" data-action="edit" data-id="' + msg.id + '" title="编辑">' + ICON_EDIT + '</button>' +
+            '<button class="btn-delete-sm admin-only" data-action="delete" data-id="' + msg.id + '" title="删除">' + ICON_DELETE + '</button>' +
           '</div>' +
         '</div>' +
         '<div class="msg-reply-form" data-reply-for="' + msg.id + '" style="display:none">' +
@@ -197,10 +197,12 @@
       var id = btn.getAttribute('data-id');
 
       if (action === 'edit') {
+        if (!window.requireAdmin()) return;
         var msg = allMessages.find(function (m) { return m.id === id; });
         if (msg) openEditor(msg);
 
       } else if (action === 'delete') {
+        if (!window.requireAdmin()) return;
         if (confirm('确定删除这条留言？')) {
           window.BlogData.remove('guestbook', id).then(function () {
             allMessages = allMessages.filter(function (m) { return m.id !== id; });

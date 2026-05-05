@@ -57,8 +57,8 @@
             '<a href="' + window.escHtml(repo.url) + '" target="_blank" rel="noopener">' + window.escHtml(repo.name) + '</a>' +
           '</div>' +
           '<div class="repo-card-actions">' +
-            '<button class="btn-edit-sm" data-action="edit" data-id="' + repo.id + '">编辑</button>' +
-            '<button class="btn-delete-sm" data-action="delete" data-id="' + repo.id + '">删除</button>' +
+            '<button class="btn-edit-sm admin-only" data-action="edit" data-id="' + repo.id + '">编辑</button>' +
+            '<button class="btn-delete-sm admin-only" data-action="delete" data-id="' + repo.id + '">删除</button>' +
           '</div>' +
         '</div>' +
         '<p class="repo-desc">' + window.escHtml(repo.description || '暂无描述') + '</p>' +
@@ -138,9 +138,11 @@
       var id = btn.getAttribute('data-id');
 
       if (action === 'edit') {
+        if (!window.requireAdmin()) return;
         var repo = allRepos.find(function (r) { return r.id === id; });
         if (repo) openEditor(repo);
       } else if (action === 'delete') {
+        if (!window.requireAdmin()) return;
         if (confirm('确定删除这个仓库？')) {
           window.BlogData.remove('github', id).then(function () {
             allRepos = allRepos.filter(function (r) { return r.id !== id; });
@@ -153,7 +155,7 @@
   }
 
   if (addBtn) {
-    addBtn.addEventListener('click', function () { openEditor(null); });
+    addBtn.addEventListener('click', function () { if (window.requireAdmin()) openEditor(null); });
   }
 
   window.BlogData.load('github', 'data/github.json', render);

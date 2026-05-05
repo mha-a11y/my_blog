@@ -904,6 +904,37 @@ body,
 }
 .btn-delete-sm:hover { background: #dc3545; color: #fff; }
 
+/* --- Admin-only elements (hidden by default) --- */
+.admin-only {
+  display: none !important;
+}
+body.is-admin .admin-only {
+  display: inline-flex !important;
+}
+body.is-admin .admin-only-block {
+  display: block !important;
+}
+
+/* Sidebar admin toggle */
+.admin-toggle-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: var(--sidebar-text);
+}
+.admin-toggle-btn:hover {
+  border-color: var(--sidebar-text-hover);
+  background: var(--sidebar-social-bg-hover);
+}
+
 /* ============================================================
    Essays Section
    ============================================================ */

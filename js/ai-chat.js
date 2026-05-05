@@ -198,7 +198,7 @@
           '<span>' + archive.messages.length + ' 条消息</span>' +
           '<div class="archive-card-actions">' +
             '<button class="btn-edit-sm" data-action="view" data-id="' + archive.id + '">查看</button>' +
-            '<button class="btn-delete-sm" data-action="delete" data-id="' + archive.id + '">删除</button>' +
+            '<button class="btn-delete-sm admin-only" data-action="delete" data-id="' + archive.id + '">删除</button>' +
           '</div>' +
         '</div>' +
         '<div class="archive-msgs" data-msgs-for="' + archive.id + '" style="display:none">' + messagesHtml + '</div>' +
@@ -259,6 +259,7 @@
           }
         }
       } else if (action === 'delete') {
+        if (!window.isAdmin && !isAdmin) { alert('需要管理员权限'); return; }
         if (confirm('确定删除这条归档对话？')) {
           window.BlogData.remove('chat-history', id).then(function () {
             archives = archives.filter(function (a) { return a.id !== id; });

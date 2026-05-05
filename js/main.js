@@ -272,4 +272,58 @@
     return parts[0] + ' 年 ' + parseInt(parts[1], 10) + ' 月';
   };
 
+  /* ============================================================
+     Global Admin System
+     ============================================================ */
+  var ADMIN_PWD = 'luna2026';
+  window.isAdmin = sessionStorage.getItem('blog-admin') === 'true';
+
+  window.requireAdmin = function () {
+    if (window.isAdmin) return true;
+    var pwd = prompt('请输入管理员密码：');
+    if (pwd === ADMIN_PWD) {
+      window.isAdmin = true;
+      sessionStorage.setItem('blog-admin', 'true');
+      updateAdminUI();
+      return true;
+    }
+    if (pwd !== null) alert('密码错误');
+    return false;
+  };
+
+  window.logoutAdmin = function () {
+    window.isAdmin = false;
+    sessionStorage.removeItem('blog-admin');
+    updateAdminUI();
+  };
+
+  function updateAdminUI() {
+    var btn = document.getElementById('admin-toggle');
+    if (btn) {
+      btn.textContent = window.isAdmin ? '🔓' : '🔑';
+      btn.title = window.isAdmin ? '管理员已登录（点击退出）' : '管理员登录';
+    }
+    document.body.classList.toggle('is-admin', window.isAdmin);
+  }
+
+  /* Inject admin toggle into sidebar */
+  var sidebarSocial = document.querySelector('.sidebar-social');
+  if (sidebarSocial) {
+    var adminBtn = document.createElement('button');
+    adminBtn.id = 'admin-toggle';
+    adminBtn.className = 'admin-toggle-btn';
+    adminBtn.title = '管理员登录';
+    adminBtn.textContent = window.isAdmin ? '🔓' : '🔑';
+    adminBtn.addEventListener('click', function () {
+      if (window.isAdmin) {
+        window.logoutAdmin();
+      } else {
+        window.requireAdmin();
+      }
+    });
+    sidebarSocial.insertBefore(adminBtn, sidebarSocial.firstChild);
+  }
+
+  updateAdminUI();
+
 })();
