@@ -333,7 +333,8 @@
   }
 
   function autoSaveToServer() {
-    if (currentMessages.length === 0) return;
+    console.log('[autoSave] called, msgs:', currentMessages.length, 'archiveId:', currentArchiveId);
+    if (currentMessages.length === 0) { console.log('[autoSave] skipped: no messages'); return; }
 
     var firstUser = currentMessages.find(function (m) { return m.role === 'user'; });
     var title = firstUser ? firstUser.content.substring(0, 30) : '对话记录';
@@ -347,13 +348,20 @@
     };
 
     if (currentArchiveId) {
-      window.BlogData.update('chat-history', currentArchiveId, payload).catch(function () {});
+      console.log('[autoSave] updating:', currentArchiveId);
+      window.BlogData.update('chat-history', currentArchiveId, payload)
+        .then(function (r) { console.log('[autoSave] update OK:', r); })
+        .catch(function (e) { console.error('[autoSave] update FAIL:', e); });
     } else {
       payload.id = window.genId();
-      window.BlogData.create('chat-history', payload).then(function (saved) {
-        currentArchiveId = saved.id;
-        saveLocalHistory(currentMessages);
-      }).catch(function () {});
+      console.log('[autoSave] creating:', payload.id);
+      window.BlogData.create('chat-history', payload)
+        .then(function (saved) {
+          currentArchiveId = saved.id;
+          saveLocalHistory(currentMessages);
+          console.log('[autoSave] create OK:', saved.id);
+        })
+        .catch(function (e) { console.error('[autoSave] create FAIL:', e); });
     }
   }
 
