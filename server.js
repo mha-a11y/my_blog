@@ -212,6 +212,14 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Sync latest data from GitHub on startup
+if (process.env.GITHUB_TOKEN) {
+  exec('git pull origin main --ff-only', { cwd: __dirname }, (err) => {
+    if (err) console.error('[startup] git pull failed:', err.message);
+    else console.log('[startup] data synced from GitHub');
+  });
+}
+
 app.listen(PORT, () => {
   console.log(`Blog server running at http://localhost:${PORT}`);
 });
