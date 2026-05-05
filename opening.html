@@ -1,0 +1,991 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+  <title>✨ 欢迎</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+    }
+
+    canvas {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* 点击提示 */
+    #hint {
+      position: fixed;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.05rem;
+      letter-spacing: 4px;
+      pointer-events: none;
+      z-index: 10;
+      animation: hintPulse 2.4s ease-in-out infinite;
+      transition: opacity 1s ease;
+      text-shadow: 0 0 20px rgba(100, 120, 255, 0.2);
+      user-select: none;
+    }
+
+    #hint.hidden {
+      opacity: 0;
+      animation: none
+    }
+
+    #hint small {
+      display: block;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      margin-top: 8px;
+      opacity: 0.5
+    }
+
+    @keyframes hintPulse {
+
+      0%,
+      100% {
+        opacity: 0.4;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      50% {
+        opacity: 0.9;
+        transform: translateX(-50%) translateY(-4px);
+      }
+    }
+
+    /* 淡入淡出遮罩 */
+    #overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 100;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* 白色渐变遮罩（爆炸后跳转用） */
+    #fade-white {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      z-index: 90;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #fade-white.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* 欢迎标题 */
+    #welcomeTitle {
+      position: fixed;
+      top: 38%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 9px;
+      white-space: nowrap;
+      z-index: 10;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    #welcomeTitle .char {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: charReveal 0.6s ease-out forwards;
+      animation-delay: calc(2s + var(--i) * 0.12s);
+      /* 白色基底 + 粉色边缘渐变衰弱 */
+      text-shadow:
+        0 0 8px rgba(255, 150, 200, 0.9),
+        0 0 18px rgba(255, 120, 180, 0.55),
+        0 0 35px rgba(255, 100, 170, 0.28),
+        0 0 60px rgba(255, 80, 160, 0.12);
+    }
+
+    @keyframes charReveal {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #welcomeSubtitle {
+      position: fixed;
+      top: calc(38% + 2.2rem + 1.1rem + 1.1rem);
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.825rem;
+      font-weight: 400;
+      color: #fff;
+      letter-spacing: 2.5px;
+      white-space: nowrap;
+      z-index: 10;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    #welcomeSubtitle .char {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: charReveal 0.6s ease-out forwards;
+      animation-delay: calc(3.5s + var(--i) * 0.12s);
+      text-shadow:
+        0 0 6px rgba(100, 180, 255, 0.9),
+        0 0 14px rgba(80, 150, 255, 0.55),
+        0 0 30px rgba(60, 120, 255, 0.28),
+        0 0 50px rgba(40, 100, 255, 0.12);
+    }
+
+    #dissolveCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 20;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="hint">✦ 点击任意处进入 ✦<small>Click Anywhere</small></div>
+  <div id="overlay"></div>
+  <div id="fade-white"></div>
+
+  <!-- 欢迎标题 -->
+  <div id="welcomeTitle"></div>
+  <div id="welcomeSubtitle"></div>
+
+
+  <!-- Three.js 动态加载 -->
+  <script>
+    function _loadScript(src, cb) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = function() { cb(true); };
+      s.onerror = function() { cb(false); };
+      document.head.appendChild(s);
+    }
+    _loadScript('js/three.min.js', function(ok) {
+      if (!ok || typeof THREE === 'undefined') {
+        console.warn('本地 Three.js 加载失败，尝试 CDN...');
+        _loadScript('https://unpkg.com/three@0.128.0/build/three.min.js', function() { _bootOpening(); });
+      } else {
+        _bootOpening();
+      }
+    });
+    function _bootOpening() {
+      if (typeof THREE === 'undefined') {
+        document.getElementById('hint').innerHTML = '⚠️ Three.js 加载失败，请检查网络后刷新<small>Failed to load Three.js</small>';
+        document.addEventListener('click', function() { window.location.href = 'index.html'; });
+        return;
+      }
+    (function () {
+      "use strict";
+
+      // ============================================================
+      //  配置
+      // ============================================================
+      var CONFIG = {
+        targetUrl: 'index.html',
+        starCount: 4000,
+        maxParticles: 600,
+        flyDuration: 1.5,
+      };
+
+      var hintEl = document.getElementById('hint');
+      var overlayEl = document.getElementById('overlay');
+      var titleEl = document.getElementById('welcomeTitle');
+      var subEl = document.getElementById('welcomeSubtitle');
+
+      // 欢迎标题逐字浮现
+      (function() {
+        var str = '欢迎来到Luna的博客';
+        titleEl.innerHTML = str.split('').map(function(ch, i) {
+          return '<span class="char" style="--i:' + i + '">' + ch + '</span>';
+        }).join('');
+      })();
+
+      // 副标题逐字浮现
+      (function() {
+        var subStr = '让我们所爱的美，成为我们所做的事';
+        subEl.innerHTML = subStr.split('').map(function(ch, i) {
+          return '<span class="char" style="--i:' + i + '">' + ch + '</span>';
+        }).join('');
+      })();
+
+      // ============================================================
+      //  爆裂特效：文字生成 3s 后原地爆炸为粒子，粒子碰撞反弹，5s 后消失
+      // ============================================================
+      (function() {
+        // 3.5s base delay + 13 chars * 0.12s + 0.6s animation = last char finishes at ~5.54s
+        var lastCharFinish = 3.5 + 13 * 0.12 + 0.6;
+        var EXPLOSION_DELAY = (lastCharFinish + 3.0) * 1000; // 3s after last char
+        var PARTICLE_LIFE = 5.0; // seconds
+        var FRICTION = 0.998;
+        var BOUNCE = 0.75;
+
+        setTimeout(function() {
+          if (skipDissolve || isClicked) return;
+
+          var W = window.innerWidth;
+          var H = window.innerHeight;
+          var dpr = window.devicePixelRatio || 1;
+
+          // Collect chars & measure positions
+          var l1chars = Array.prototype.slice.call(titleEl.querySelectorAll('.char'));
+          var l2chars = Array.prototype.slice.call(subEl.querySelectorAll('.char'));
+
+          var l1Style = window.getComputedStyle(l1chars[0]);
+          var l2Style = window.getComputedStyle(l2chars[0]);
+          var l1FontSize = parseFloat(l1Style.fontSize);
+          var l2FontSize = parseFloat(l2Style.fontSize);
+          var l1Font = l1Style.fontWeight + ' ' + l1FontSize + 'px ' + l1Style.fontFamily;
+          var l2Font = l2Style.fontWeight + ' ' + l2FontSize + 'px ' + l2Style.fontFamily;
+
+          var l1Rects = l1chars.map(function(c) { return c.getBoundingClientRect(); });
+          var l2Rects = l2chars.map(function(c) { return c.getBoundingClientRect(); });
+
+          // Sample particles from text pixels
+          var tmp = document.createElement('canvas');
+          var tctx = tmp.getContext('2d');
+          var STEP = 2; // sample every N pixels
+
+          function sampleGlyph(text, font, drawX, drawY, w, h) {
+            var cw = Math.ceil(w);
+            var ch = Math.ceil(h);
+            if (cw < 1 || ch < 1) return [];
+            tmp.width = cw * dpr;
+            tmp.height = ch * dpr;
+            tctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            tctx.clearRect(0, 0, cw, ch);
+            tctx.font = font;
+            tctx.textBaseline = 'top';
+            tctx.fillStyle = '#fff';
+            tctx.fillText(text, 0, 0);
+            var img = tctx.getImageData(0, 0, tmp.width, tmp.height);
+            var dd = img.data;
+            var ps = [];
+            for (var y = 0; y < tmp.height; y += STEP) {
+              for (var x = 0; x < tmp.width; x += STEP) {
+                if (dd[(y * tmp.width + x) * 4 + 3] > 50) {
+                  ps.push({
+                    ox: drawX + x / dpr,
+                    oy: drawY + y / dpr,
+                    sz: 0.3 + Math.random() * 0.5
+                  });
+                }
+              }
+            }
+            return ps;
+          }
+
+          // Collect all particles with explosion velocities
+          var particles = [];
+          var cx = W / 2, cy = H / 2; // screen center for velocity direction
+
+          function addParticles(ps) {
+            for (var i = 0; i < ps.length; i++) {
+              var p = ps[i];
+              var dx = p.ox - cx;
+              var dy = p.oy - cy;
+              var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+              // Radial outward + random spread
+              var speed = 120 + Math.random() * 280;
+              var angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 1.2;
+              particles.push({
+                x: p.ox, y: p.oy,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                sz: p.sz,
+                life: PARTICLE_LIFE,
+                maxLife: PARTICLE_LIFE
+              });
+            }
+          }
+
+          // Sample from L1 (title)
+          for (var i = 0; i < l1chars.length; i++) {
+            var r = l1Rects[i];
+            addParticles(sampleGlyph(l1chars[i].textContent, l1Font, r.left, r.top, r.width, r.height));
+          }
+          // Sample from L2 (subtitle)
+          for (var i = 0; i < l2chars.length; i++) {
+            var r = l2Rects[i];
+            addParticles(sampleGlyph(l2chars[i].textContent, l2Font, r.left, r.top, r.width, r.height));
+          }
+
+          // Fade out DOM text
+          titleEl.style.transition = 'opacity 0.25s ease-out';
+          subEl.style.transition = 'opacity 0.25s ease-out';
+          titleEl.style.opacity = '0';
+          subEl.style.opacity = '0';
+          setTimeout(function() {
+            titleEl.style.visibility = 'hidden';
+            subEl.style.visibility = 'hidden';
+          }, 260);
+
+          // Create canvas
+          var cvs = document.createElement('canvas');
+          cvs.id = 'dissolveCanvas';
+          cvs.width = W * dpr;
+          cvs.height = H * dpr;
+          cvs.style.width = W + 'px';
+          cvs.style.height = H + 'px';
+          document.body.appendChild(cvs);
+          var ctx = cvs.getContext('2d');
+          ctx.scale(dpr, dpr);
+
+          // Handle window resize
+          window.addEventListener('resize', function() {
+            W = window.innerWidth;
+            H = window.innerHeight;
+          });
+
+          // Animation loop
+          var t0 = performance.now();
+          var prevT = t0;
+
+          function run() {
+            var now = performance.now();
+            var dt = Math.min((now - prevT) / 1000, 0.05); // seconds, capped
+            prevT = now;
+
+            ctx.clearRect(0, 0, W, H);
+
+            var alive = 0;
+            for (var i = 0; i < particles.length; i++) {
+              var p = particles[i];
+              if (p.life <= 0) continue;
+              alive++;
+
+              // Physics
+              p.vy += 120 * dt; // gravity
+              p.vx *= FRICTION;
+              p.vy *= FRICTION;
+              p.x += p.vx * dt;
+              p.y += p.vy * dt;
+
+              // Bounce off edges
+              if (p.x < 0)           { p.x = 0;           p.vx = Math.abs(p.vx) * BOUNCE; }
+              if (p.x > W)           { p.x = W;           p.vx = -Math.abs(p.vx) * BOUNCE; }
+              if (p.y < 0)           { p.y = 0;           p.vy = Math.abs(p.vy) * BOUNCE; }
+              if (p.y > H)           { p.y = H;           p.vy = -Math.abs(p.vy) * BOUNCE; }
+
+              // Fade
+              p.life -= dt;
+              var alpha = Math.max(0, p.life / p.maxLife);
+
+              ctx.globalAlpha = alpha;
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(p.x, p.y, p.sz, p.sz);
+            }
+            ctx.globalAlpha = 1;
+
+            if (alive > 0) {
+              requestAnimationFrame(run);
+            } else {
+              var fadeWhite = document.getElementById('fade-white');
+              fadeWhite.classList.add('active');
+              setTimeout(function () {
+                window.location.href = CONFIG.targetUrl;
+              }, 1000);
+            }
+          }
+          requestAnimationFrame(run);
+        }, EXPLOSION_DELAY);
+      })();
+
+      // ==================================================
+      //  Three.js 场景
+      // ============================================================
+      console.log('Three.js loaded, version:', THREE.REVISION);
+
+      var scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x000005, 0.004);
+      scene.background = new THREE.Color(0x020010);
+
+      var camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 300);
+      camera.position.set(0, 0, 10);
+
+      var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(0x020010, 1);
+      document.body.appendChild(renderer.domElement);
+
+      // ============================================================
+      //  1) 星空粒子
+      // ============================================================
+      var starGeom = new THREE.BufferGeometry();
+      var starPos = new Float32Array(CONFIG.starCount * 3);
+      var starSizes = new Float32Array(CONFIG.starCount);
+      var starBrights = new Float32Array(CONFIG.starCount);
+
+      for (var i = 0; i < CONFIG.starCount; i++) {
+        var theta = Math.random() * Math.PI * 2;
+        var phi = Math.acos(2 * Math.random() - 1);
+        var r = 40 + Math.random() * 100;
+        starPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+        starPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+        starPos[i * 3 + 2] = r * Math.cos(phi) - 50;
+        starSizes[i] = 2.0 + Math.random() * 6.0;
+        starBrights[i] = Math.random();
+      }
+
+      starGeom.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+      starGeom.setAttribute('size', new THREE.BufferAttribute(starSizes, 1));
+      starGeom.setAttribute('bright', new THREE.BufferAttribute(starBrights, 1));
+
+      var starMat = new THREE.ShaderMaterial({
+        uniforms: {
+          uTime: { value: 0 },
+          uPixelRatio: { value: renderer.getPixelRatio() }
+        },
+        vertexShader: `
+    attribute float size;
+    attribute float bright;
+    uniform float uPixelRatio;
+    uniform float uTime;
+    varying float vBright;
+    void main() {
+      vBright = bright;
+      vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+      float twinkle = 0.7 + 0.3 * sin(uTime * 2.0 + bright * 30.0);
+      gl_PointSize = max(size * uPixelRatio * (100.0 / -mvPos.z) * twinkle, 0.0);
+      gl_Position = projectionMatrix * mvPos;
+    }
+  `,
+        fragmentShader: `
+    precision highp float;
+    varying float vBright;
+    uniform float uTime;
+    void main() {
+      float d = length(gl_PointCoord - 0.5) * 2.0;
+      if (d > 1.0) discard;
+      float flick = 0.7 + 0.3 * sin(uTime * 2.5 + vBright * 40.0);
+      float alpha = (1.0 - d * d) * flick;
+      vec3 color = mix(vec3(0.55, 0.65, 1.0), vec3(1.0, 0.9, 0.7), vBright);
+      gl_FragColor = vec4(color, alpha);
+    }
+  `,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      });
+
+      var stars = new THREE.Points(starGeom, starMat);
+      scene.add(stars);
+
+      // ============================================================
+      //  2b) 地球 + 星环
+      // ============================================================
+      var sunLight = new THREE.DirectionalLight(0xffffff, 1.0);
+      sunLight.position.set(5, 3, 5);
+      scene.add(sunLight);
+      scene.add(new THREE.AmbientLight(0x222244, 0.3));
+
+      // ============================================================
+      //  3) 纸飞机模型
+      // ============================================================
+      function createPaperAirplane() {
+        var verts = new Float32Array([
+          // 机身
+          0.0, 0.06, 1.0,   // 0 鼻尖
+          0.0, 0.0, 0.0,   // 1 中心
+          0.0, -0.06, -0.8,   // 2 尾尖
+          // 左翼
+          -0.7, 0.25, 0.4,   // 3 左翼尖
+          -0.45, 0.06, -0.6,   // 4 左翼尾
+          // 右翼
+          0.7, 0.25, 0.4,   // 5 右翼尖
+          0.45, 0.06, -0.6,   // 6 右翼尾
+          // 尾翼
+          0.0, 0.4, -0.55,  // 7 尾翼上
+        ]);
+
+        var idx = [
+          0, 1, 3, 1, 3, 4, 1, 4, 2,
+          0, 1, 5, 1, 5, 6, 1, 6, 2,
+          2, 4, 7, 2, 6, 7, 4, 2, 6
+        ];
+
+        var geom = new THREE.BufferGeometry();
+        geom.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+        geom.setIndex(idx);
+        geom.computeVertexNormals();
+        return geom;
+      }
+
+      var airplaneMat = new THREE.ShaderMaterial({
+        uniforms: { uTime: { value: 0 } },
+        vertexShader: `
+    varying vec2 vUV;
+    void main() {
+      vUV = position.xz * 0.5 + 0.5;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+        fragmentShader: `
+    precision highp float;
+    uniform float uTime;
+    varying vec2 vUV;
+    void main() {
+      vec2 uv = vUV;
+      vec3 col = vec3(0.12, 0.06, 0.22);
+      float edge = abs(uv.x) * 0.5;
+      col += vec3(0.25, 0.15, 0.50) * (1.0 - edge);
+      float spark = 0.5 + 0.5 * sin(uTime * 3.0 + uv.y * 20.0);
+      col += vec3(0.08, 0.15, 0.35) * spark;
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `,
+        side: THREE.DoubleSide
+      });
+
+      var airplane = new THREE.Mesh(createPaperAirplane(), airplaneMat);
+      airplane.visible = false;
+      airplane.scale.set(0, 0, 0);
+
+      var GATHER_COUNT = 800;
+      var gatherGeom = new THREE.BufferGeometry();
+      var gatherPos = new Float32Array(GATHER_COUNT * 3);
+      var gatherTarget = new Float32Array(GATHER_COUNT * 3);
+      var gatherStart = new Float32Array(GATHER_COUNT * 3);
+      var gatherAlpha = new Float32Array(GATHER_COUNT);
+      var gatherSizes = new Float32Array(GATHER_COUNT);
+
+      var airVerts = [
+        [0.0, 0.06, 1.0],
+        [0.0, 0.0, 0.0],
+        [0.0, -0.06, -0.8],
+        [-0.7, 0.25, 0.4],
+        [-0.45, 0.06, -0.6],
+        [0.7, 0.25, 0.4],
+        [0.45, 0.06, -0.6],
+        [0.0, 0.4, -0.55]
+      ];
+      var airFaces = [
+        [0,1,3], [1,3,4], [1,4,2],
+        [0,1,5], [1,5,6], [1,6,2],
+        [2,4,7], [2,6,7], [4,2,6]
+      ];
+
+      function randomPointOnTriangle(a, b, c) {
+        var u = Math.random(), v = Math.random();
+        if (u + v > 1) { u = 1 - u; v = 1 - v; }
+        return [
+          a[0] + u*(b[0]-a[0]) + v*(c[0]-a[0]),
+          a[1] + u*(b[1]-a[1]) + v*(c[1]-a[1]),
+          a[2] + u*(b[2]-a[2]) + v*(c[2]-a[2])
+        ];
+      }
+
+      var AIRPLANE_SCALE = 2.5;
+      for (var gi = 0; gi < GATHER_COUNT; gi++) {
+        var gtheta = Math.random() * Math.PI * 2;
+        var gphi = Math.acos(2 * Math.random() - 1);
+        var gr = 3 + Math.random() * 20;
+        gatherStart[gi*3] = gr * Math.sin(gphi) * Math.cos(gtheta);
+        gatherStart[gi*3+1] = gr * Math.sin(gphi) * Math.sin(gtheta);
+        gatherStart[gi*3+2] = gr * Math.cos(gphi);
+        gatherPos[gi*3] = gatherStart[gi*3];
+        gatherPos[gi*3+1] = gatherStart[gi*3+1];
+        gatherPos[gi*3+2] = gatherStart[gi*3+2];
+        var face = airFaces[Math.floor(Math.random() * airFaces.length)];
+        var pt = randomPointOnTriangle(airVerts[face[0]], airVerts[face[1]], airVerts[face[2]]);
+        gatherTarget[gi*3] = pt[0] * AIRPLANE_SCALE;
+        gatherTarget[gi*3+1] = pt[1] * AIRPLANE_SCALE;
+        gatherTarget[gi*3+2] = pt[2] * AIRPLANE_SCALE + 5.0;
+        gatherAlpha[gi] = 0.0;
+        gatherSizes[gi] = 0.5 + Math.random() * 1.5;
+      }
+
+      gatherGeom.setAttribute('position', new THREE.BufferAttribute(gatherPos, 3));
+      gatherGeom.setAttribute('alpha', new THREE.BufferAttribute(gatherAlpha, 1));
+      gatherGeom.setAttribute('size', new THREE.BufferAttribute(gatherSizes, 1));
+
+      var gatherMat = new THREE.ShaderMaterial({
+        uniforms: { uPixelRatio: { value: renderer.getPixelRatio() } },
+        vertexShader: `
+    attribute float alpha;
+    attribute float size;
+    uniform float uPixelRatio;
+    varying float vAlpha;
+    void main() {
+      vAlpha = alpha;
+      vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+      gl_PointSize = max(size * uPixelRatio * (80.0 / -mvPos.z), 0.0);
+      gl_Position = projectionMatrix * mvPos;
+    }
+  `,
+        fragmentShader: `
+    precision highp float;
+    varying float vAlpha;
+    void main() {
+      float d = length(gl_PointCoord - 0.5) * 2.0;
+      if (d > 1.0) discard;
+      float a = (1.0 - d * d) * vAlpha;
+      vec3 c = mix(vec3(0.4, 0.6, 1.0), vec3(1.0, 0.85, 0.6), vAlpha * 0.5 + 0.5);
+      gl_FragColor = vec4(c, a);
+    }
+  `,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      });
+
+      var gatherParticles = new THREE.Points(gatherGeom, gatherMat);
+      scene.add(gatherParticles);
+
+      // ============================================================
+      //  4) 粒子拖尾
+      // ============================================================
+      var MAX_P = CONFIG.maxParticles;
+      var partPos = new Float32Array(MAX_P * 3);
+      var partVel = [];
+      var partLife = new Float32Array(MAX_P);
+      var partSizes = new Float32Array(MAX_P);
+      var partIdx = 0;
+
+      for (var i = 0; i < MAX_P; i++) {
+        partLife[i] = 0;
+        partSizes[i] = 2 + Math.random() * 4;
+        partVel.push([0, 0, 0]);
+      }
+
+      var partGeom = new THREE.BufferGeometry();
+      partGeom.setAttribute('position', new THREE.BufferAttribute(partPos, 3));
+      partGeom.setAttribute('life', new THREE.BufferAttribute(partLife, 1));
+      partGeom.setAttribute('size', new THREE.BufferAttribute(partSizes, 1));
+
+      var partMat = new THREE.ShaderMaterial({
+        uniforms: { uPixelRatio: { value: renderer.getPixelRatio() } },
+        vertexShader: `
+    attribute float life;
+    attribute float size;
+    uniform float uPixelRatio;
+    varying float vLife;
+    void main() {
+      vLife = life;
+      vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+      gl_PointSize = max(size * uPixelRatio * (50.0 / -mvPos.z) * life, 0.0);
+      gl_Position = projectionMatrix * mvPos;
+    }
+  `,
+        fragmentShader: `
+    precision highp float;
+    varying float vLife;
+    void main() {
+      float d = length(gl_PointCoord - 0.5) * 2.0;
+      if (d > 1.0) discard;
+      float alpha = (1.0 - d * d) * vLife * 0.7;
+      vec3 c = mix(vec3(0.4, 0.6, 1.0), vec3(1.0, 0.8, 0.5), 1.0 - vLife);
+      gl_FragColor = vec4(c, alpha);
+    }
+  `,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      });
+
+      var particles = new THREE.Points(partGeom, partMat);
+      scene.add(particles);
+
+      // ============================================================
+      //  状态管理
+      // ============================================================
+      var STATE = { IDLE: 0, GATHERING: 1, FLYING: 2, DONE: 3 };
+      var state = STATE.IDLE;
+      var running = true;
+      var foldTime = 0;
+      var gatherTime = 0;
+      var flyTime = 0;
+      var bgFade = 1.0;
+      var clock = new THREE.Clock();
+
+      // 贝塞尔路径 - 从中心向右上前方飞出
+      var flyPath = {
+        start: new THREE.Vector3(0, 0, 5),
+        cp1: new THREE.Vector3(3.0, 3.0, 7.0),
+        cp2: new THREE.Vector3(7.0, 5.0, 9.0),
+        end: new THREE.Vector3(15, 8, 11)
+      };
+
+      // ============================================================
+      //  交互
+      // ============================================================
+      var mouse = new THREE.Vector2();
+      var targetMouse = new THREE.Vector2();
+      var isClicked = false;
+      var skipDissolve = false;
+
+      document.addEventListener('mousemove', function (e) {
+        targetMouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        targetMouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      });
+
+      document.addEventListener('touchmove', function (e) {
+        if (e.touches.length > 0) {
+          targetMouse.x = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
+          targetMouse.y = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
+        }
+      }, { passive: true });
+
+      function handleClick(e) {
+        if (isClicked) return;
+        isClicked = true;
+        skipDissolve = true;
+        state = STATE.GATHERING;
+        gatherTime = 0;
+        hintEl.classList.add('hidden');
+
+        /* Fade out the DOM title/subtitle so they don't overlap the airplane */
+        titleEl.style.transition = 'opacity 0.6s ease';
+        subEl.style.transition = 'opacity 0.6s ease';
+        titleEl.style.opacity = '0';
+        subEl.style.opacity = '0';
+        setTimeout(function() {
+          titleEl.style.visibility = 'hidden';
+          subEl.style.visibility = 'hidden';
+        }, 600);
+      }
+
+      document.addEventListener('click', function (e) {
+        handleClick(e);
+      });
+      document.addEventListener('touchend', function (e) {
+        if (!isClicked) {
+          e.preventDefault();
+          handleClick(e);
+        }
+      });
+
+      // hint stays visible until user clicks
+
+      // ============================================================
+      //  粒子系统
+      // ============================================================
+      function emitParticles(pos, count) {
+        for (var n = 0; n < count; n++) {
+          var i = partIdx % MAX_P;
+          partPos[i * 3] = pos.x + (Math.random() - 0.5) * 0.2;
+          partPos[i * 3 + 1] = pos.y + (Math.random() - 0.5) * 0.2;
+          partPos[i * 3 + 2] = pos.z + (Math.random() - 0.5) * 0.2;
+          partLife[i] = 1.0;
+          partVel[i][0] = (Math.random() - 0.5) * 0.03;
+          partVel[i][1] = (Math.random() - 0.5) * 0.03 + 0.015;
+          partVel[i][2] = (Math.random() - 0.5) * 0.03;
+          partIdx++;
+        }
+      }
+
+      function updateParticles(dt) {
+        var ts = dt * 60;
+        for (var i = 0; i < MAX_P; i++) {
+          if (partLife[i] > 0) {
+            partLife[i] -= dt * 1.0;
+            if (partLife[i] < 0) partLife[i] = 0;
+            partPos[i * 3] += partVel[i][0] * ts;
+            partPos[i * 3 + 1] += partVel[i][1] * ts;
+            partPos[i * 3 + 2] += partVel[i][2] * ts;
+            partVel[i][0] *= 0.985;
+            partVel[i][1] *= 0.985;
+            partVel[i][2] *= 0.985;
+          }
+        }
+        partGeom.attributes.position.needsUpdate = true;
+        partGeom.attributes.life.needsUpdate = true;
+      }
+
+      // ============================================================
+      //  贝塞尔
+      // ============================================================
+      function bezier3(t, p0, p1, p2, p3) {
+        var u = 1 - t;
+        return u * u * u * p0 + 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t * p3;
+      }
+
+      function bezierPoint(t, path) {
+        return new THREE.Vector3(
+          bezier3(t, path.start.x, path.cp1.x, path.cp2.x, path.end.x),
+          bezier3(t, path.start.y, path.cp1.y, path.cp2.y, path.end.y),
+          bezier3(t, path.start.z, path.cp1.z, path.cp2.z, path.end.z)
+        );
+      }
+
+      // ============================================================
+      //  自适应
+      // ============================================================
+      window.addEventListener('resize', function () {
+        var w = window.innerWidth, h = window.innerHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      });
+
+      // ============================================================
+      //  清理
+      // ============================================================
+      function cleanup() {
+        scene.traverse(function (obj) {
+          if (obj.geometry) obj.geometry.dispose();
+          if (obj.material) {
+            if (obj.material.map) obj.material.map.dispose();
+            obj.material.dispose();
+          }
+        });
+        renderer.dispose();
+        if (renderer.domElement.parentNode) {
+          renderer.domElement.parentNode.removeChild(renderer.domElement);
+        }
+      }
+
+      function beginTransition() {
+        overlayEl.classList.add('active');
+        running = false;
+        setTimeout(function () {
+          cleanup();
+          window.location.href = CONFIG.targetUrl;
+        }, 900);
+      }
+
+      // ============================================================
+      //  主循环
+      // ============================================================
+      function animate() {
+        if (!running) return;
+        requestAnimationFrame(animate);
+
+        var dt = Math.min(clock.getDelta(), 0.05);
+        var elapsed = clock.elapsedTime;
+
+        // 更新 uniforms
+        starMat.uniforms.uTime.value = elapsed;
+
+        mouse.x += (targetMouse.x - mouse.x) * 0.06;
+        mouse.y += (targetMouse.y - mouse.y) * 0.06;
+
+        // 星星旋转
+        stars.rotation.y = elapsed * 0.006;
+        stars.rotation.x = Math.sin(elapsed * 0.004) * 0.04;
+
+        // 相机微动
+        var camTargetX = mouse.x * 0.2;
+        var camTargetY = mouse.y * 0.15;
+        camera.position.x += (camTargetX - camera.position.x) * 0.02;
+        camera.position.y += (camTargetY - camera.position.y) * 0.02;
+        camera.lookAt(0, 0, 0);
+
+        // 状态机
+        switch (state) {
+          case STATE.IDLE:
+            break;
+
+          case STATE.GATHERING:
+            gatherTime += dt;
+            var progress = Math.min(gatherTime / 1.8, 1.0);
+            var eased = progress < 0.5
+              ? 2 * progress * progress
+              : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+            for (var gi = 0; gi < GATHER_COUNT; gi++) {
+              gatherPos[gi*3] = gatherStart[gi*3] + (gatherTarget[gi*3] - gatherStart[gi*3]) * eased;
+              gatherPos[gi*3+1] = gatherStart[gi*3+1] + (gatherTarget[gi*3+1] - gatherStart[gi*3+1]) * eased;
+              gatherPos[gi*3+2] = gatherStart[gi*3+2] + (gatherTarget[gi*3+2] - gatherStart[gi*3+2]) * eased;
+              gatherAlpha[gi] = Math.min(eased * 2.5, 1.0);
+            }
+            gatherGeom.attributes.position.needsUpdate = true;
+            gatherGeom.attributes.alpha.needsUpdate = true;
+
+            if (progress >= 1.0) {
+              state = STATE.FLYING;
+              flyTime = 0;
+            }
+            break;
+
+          case STATE.FLYING:
+            flyTime += dt;
+            var t = Math.min(flyTime / CONFIG.flyDuration, 1.0);
+            var easedFly = t < 0.5
+              ? 2 * t * t
+              : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+            var pos = bezierPoint(easedFly, flyPath);
+
+            for (var gi = 0; gi < GATHER_COUNT; gi++) {
+              gatherPos[gi*3] = gatherTarget[gi*3] + pos.x;
+              gatherPos[gi*3+1] = gatherTarget[gi*3+1] + pos.y;
+              gatherPos[gi*3+2] = gatherTarget[gi*3+2] + pos.z;
+              gatherAlpha[gi] = Math.max(0, 1.0 - t * 0.6);
+            }
+            gatherGeom.attributes.position.needsUpdate = true;
+            gatherGeom.attributes.alpha.needsUpdate = true;
+
+            emitParticles(pos, 5);
+
+            bgFade = Math.max(0, 1 - t * 1.0);
+
+            if (flyTime >= CONFIG.flyDuration + 0.3) {
+              state = STATE.DONE;
+              beginTransition();
+            }
+            break;
+
+          case STATE.DONE:
+            break;
+        }
+
+        if (state !== STATE.DONE) {
+          updateParticles(dt);
+        }
+
+        scene.background.setRGB(0.005, 0.0, 0.04 * bgFade);
+        renderer.render(scene, camera);
+      }
+
+      animate();
+
+    })();
+    } // end _bootOpening
+  </script>
+</body>
+
+</html>

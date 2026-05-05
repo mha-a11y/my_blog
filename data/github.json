@@ -1,0 +1,62 @@
+[
+  {
+    "id": "r1",
+    "name": "awesome-blog",
+    "description": "一个使用纯 HTML/CSS/JS 搭建的现代个人博客系统",
+    "language": "JavaScript",
+    "stars": 156,
+    "forks": 32,
+    "url": "https://github.com/your-username/awesome-blog",
+    "updated": "2025-04-28"
+  },
+  {
+    "id": "r2",
+    "name": "react-dashboard",
+    "description": "基于 React + TypeScript 的数据可视化仪表盘",
+    "language": "TypeScript",
+    "stars": 89,
+    "forks": 15,
+    "url": "https://github.com/your-username/react-dashboard",
+    "updated": "2025-04-25"
+  },
+  {
+    "id": "r3",
+    "name": "rust-cli-tool",
+    "description": "用 Rust 编写的高性能命令行工具集",
+    "language": "Rust",
+    "stars": 67,
+    "forks": 8,
+    "url": "https://github.com/your-username/rust-cli-tool",
+    "updated": "2025-04-20"
+  },
+  {
+    "id": "r4",
+    "name": "vue3-component-lib",
+    "description": "轻量级 Vue 3 组件库，支持 Tree Shaking",
+    "language": "Vue",
+    "stars": 234,
+    "forks": 45,
+    "url": "https://github.com/your-username/vue3-component-lib",
+    "updated": "2025-04-18"
+  },
+  {
+    "id": "r5",
+    "name": "python-ml-notes",
+    "description": "机器学习学习笔记与实战代码",
+    "language": "Python",
+    "stars": 178,
+    "forks": 56,
+    "url": "https://github.com/your-username/python-ml-notes",
+    "updated": "2025-04-15"
+  },
+  {
+    "id": "r6",
+    "name": "go-microservice",
+    "description": "基于 Go 的微服务架构示例项目",
+    "language": "Go",
+    "stars": 95,
+    "forks": 21,
+    "url": "https://github.com/your-username/go-microservice",
+    "updated": "2025-04-12"
+  }
+]

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的博客 — 记录技术与生活</title>
+  <meta name="description" content="个人博客：随笔、风景摄影、GitHub 项目、留言板与 AI 助手。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    // Prevent flash of wrong theme
+    (function() {
+      try {
+        var saved = localStorage.getItem('blog-theme');
+        if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch(e) {}
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- Scroll Progress Bar -->
+  <div class="scroll-progress">
+    <div class="scroll-progress-bar" id="scroll-progress-bar"></div>
+  </div>
+
+  <!-- Theme Toggle (Moon / Sun) -->
+  <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  </button>
+
+  <!-- ============================================================
+       Sidebar Navigation
+       ============================================================ -->
+  <button class="hamburger" id="hamburger" aria-label="菜单">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">Luna's Blog</div>
+
+    <nav class="sidebar-nav" id="sidebar-nav">
+      <!-- 1. 随笔 -->
+      <a href="#essays" class="active">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+        随笔
+      </a>
+      <!-- 2. 风景走廊 -->
+      <a href="#gallery">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+        风景走廊
+      </a>
+      <!-- 3. GitHub -->
+      <a href="#github">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        GitHub
+      </a>
+      <!-- 4. 留言 -->
+      <a href="#guestbook">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+        留言
+      </a>
+      <!-- 5. AI 助手 -->
+      <a href="#ai-chat">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+        AI 助手
+      </a>
+    </nav>
+
+    <div class="sidebar-social">
+      <a href="https://github.com" target="_blank" rel="noopener" aria-label="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+      </a>
+      <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       Main Content
+       ============================================================ -->
+  <main class="main">
+
+    <!-- ========================================================
+         Hero
+         ======================================================== -->
+    <section class="section hero" id="home">
+      <div class="section-inner">
+        <div class="hero-content">
+          <div class="hero-text">
+            <p class="hero-greeting">Welcome to my blog</p>
+            <h1 class="hero-name">记录技术<br>与生活</h1>
+            <p class="hero-title">随笔 · 摄影 · 开源 · AI</p>
+            <p class="hero-desc">
+              一个热爱编程、摄影和旅行的全栈开发者。白天写代码，晚上写随笔，周末去拍照。
+            </p>
+            <a href="#essays" class="hero-cta">
+              开始阅读
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+          <div class="hero-image">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=640&h=800&fit=crop&crop=face" alt="头像">
+          </div>
+        </div>
+        <div class="hero-scroll-indicator">
+          <span>SCROLL</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider">
+      <div class="section-divider-dot"></div>
+    </div>
+
+    <!-- ========================================================
+         Section 1: 随笔 (Essays)
+         ======================================================== -->
+    <section class="section" id="essays">
+      <div class="section-inner">
+        <p class="section-label reveal">Essays</p>
+        <h2 class="section-title reveal">随笔</h2>
+        <p class="section-desc reveal">记录技术探索、生活感悟和读书笔记。</p>
+        <div class="section-actions reveal">
+          <button class="btn-action btn-add" id="add-essay-btn">+ 写随笔</button>
+        </div>
+        <div class="essays-layout">
+          <div class="essays-list" id="essays-list">
+            <!-- Dynamic content -->
+          </div>
+          <div class="essays-archive" id="essays-archive">
+            <!-- Dynamic archive sidebar -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider">
+      <div class="section-divider-dot"></div>
+    </div>
+
+    <!-- ========================================================
+         Section 2: 风景走廊 (Gallery)
+         ======================================================== -->
+    <section class="section" id="gallery">
+      <div class="section-inner">
+        <p class="section-label reveal">Gallery</p>
+        <h2 class="section-title reveal">风景走廊</h2>
+        <p class="section-desc reveal">用镜头定格世界的美好瞬间。</p>
+        <div class="section-actions reveal">
+          <button class="btn-action btn-add" id="add-photo-btn">+ 添加照片</button>
+        </div>
+        <div class="gallery-filter reveal" id="gallery-filter"></div>
+        <div class="masonry" id="masonry-grid"></div>
+      </div>
+    </section>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+      <button class="lightbox-close" id="lightbox-close">&times;</button>
+      <button class="lightbox-nav lightbox-prev" id="lightbox-prev">&lsaquo;</button>
+      <button class="lightbox-nav lightbox-next" id="lightbox-next">&rsaquo;</button>
+      <img id="lightbox-img" class="lightbox-img" src="" alt="">
+      <div class="lightbox-info">
+        <h3 id="lightbox-title"></h3>
+        <p id="lightbox-desc"></p>
+      </div>
+      <div class="lightbox-hint">ESC 关闭 &middot; &larr; &rarr; 切换</div>
+    </div>
+
+    <!-- Section Divider -->
+    <div class="section-divider">
+      <div class="section-divider-dot"></div>
+    </div>
+
+    <!-- ========================================================
+         Section 3: GitHub
+         ======================================================== -->
+    <section class="section" id="github">
+      <div class="section-inner">
+        <p class="section-label reveal">Open Source</p>
+        <h2 class="section-title reveal">GitHub</h2>
+        <p class="section-desc reveal">我的开源项目与代码仓库。</p>
+        <div class="section-actions reveal">
+          <button class="btn-action btn-add" id="add-repo-btn">+ 添加仓库</button>
+        </div>
+        <div class="github-grid" id="github-grid">
+          <!-- Dynamic content -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider">
+      <div class="section-divider-dot"></div>
+    </div>
+
+    <!-- ========================================================
+         Section 4: 留言 (Guestbook)
+         ======================================================== -->
+    <section class="section" id="guestbook">
+      <div class="section-inner">
+        <p class="section-label reveal">Guestbook</p>
+        <h2 class="section-title reveal">留言</h2>
+        <p class="section-desc reveal">欢迎留下你的足迹，每一条留言我都会认真阅读。</p>
+
+        <div class="guestbook-form reveal" id="guestbook-form">
+          <div class="guestbook-form-row">
+            <div class="form-group">
+              <label for="gb-name">昵称</label>
+              <input type="text" id="gb-name" class="form-input" placeholder="你的昵称">
+            </div>
+            <div class="form-group">
+              <label for="gb-msg">留言内容</label>
+              <input type="text" id="gb-msg" class="form-input" placeholder="想说的话...">
+            </div>
+            <button class="btn-action btn-add" id="gb-submit-btn" style="margin-bottom:20px">发送</button>
+          </div>
+        </div>
+
+        <div class="essays-layout">
+          <div class="guestbook-messages essays-list" id="guestbook-messages">
+            <!-- Dynamic content -->
+          </div>
+          <div class="essays-archive" id="guestbook-archive">
+            <!-- Dynamic archive sidebar -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider">
+      <div class="section-divider-dot"></div>
+    </div>
+
+    <!-- ========================================================
+         Section 5: AI 助手 (Chat)
+         ======================================================== -->
+    <section class="section" id="ai-chat">
+      <div class="section-inner">
+        <p class="section-label reveal">AI Assistant</p>
+        <h2 class="section-title reveal">AI 助手</h2>
+        <p class="section-desc reveal">和博客主人的 AI 分身聊聊天吧。</p>
+
+        <div class="chat-container reveal">
+          <div class="chat-header">
+            <div class="chat-header-avatar">🤖</div>
+            <div class="chat-header-info">
+              <h3>AI 分身</h3>
+              <p>在线 · 幽默轻松</p>
+            </div>
+          </div>
+
+          <div class="chat-messages" id="chat-messages"></div>
+
+          <div class="chat-input-area">
+            <textarea id="chat-input" class="chat-input" placeholder="输入消息... (Enter 发送)" rows="1"></textarea>
+            <button id="chat-send" class="chat-send" aria-label="发送">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         Footer
+         ======================================================== -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <p>&copy; 2026 Blog. Designed & built with care.</p>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- ============================================================
+       Edit Modal (shared across all sections)
+       ============================================================ -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">编辑</h3>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- Dynamic form fields -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="modal-cancel">取消</button>
+        <button class="btn-save" id="modal-save">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+  <script src="js/edit-modal.js"></script>
+  <script src="js/essays.js"></script>
+  <script src="js/gallery.js"></script>
+  <script src="js/github.js"></script>
+  <script src="js/guestbook.js"></script>
+  <script src="js/ai-chat.js"></script>
+</body>
+</html>

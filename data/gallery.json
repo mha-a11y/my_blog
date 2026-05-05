@@ -1,0 +1,110 @@
+[
+  {
+    "id": "g1",
+    "thumb": "https://picsum.photos/seed/mountain1/400/500",
+    "full": "https://picsum.photos/seed/mountain1/1200/1500",
+    "title": "云海翻涌的黄山",
+    "location": "安徽黄山",
+    "category": "山川",
+    "description": "清晨站在光明顶，看着云海在脚下翻涌，远处的山峰若隐若现，仿佛置身仙境。"
+  },
+  {
+    "id": "g2",
+    "thumb": "https://picsum.photos/seed/city1/400/300",
+    "full": "https://picsum.photos/seed/city1/1200/900",
+    "title": "上海外滩夜景",
+    "location": "上海外滩",
+    "category": "城市",
+    "description": "灯火辉煌的外滩夜景，东方明珠在夜空中格外耀眼。"
+  },
+  {
+    "id": "g3",
+    "thumb": "https://picsum.photos/seed/ocean1/400/350",
+    "full": "https://picsum.photos/seed/ocean1/1200/1050",
+    "title": "三亚的碧海蓝天",
+    "location": "海南三亚",
+    "category": "大海",
+    "description": "清澈见底的海水，洁白细腻的沙滩，椰风海韵中感受热带海岛的魅力。"
+  },
+  {
+    "id": "g4",
+    "thumb": "https://picsum.photos/seed/stars1/400/550",
+    "full": "https://picsum.photos/seed/stars1/1200/1650",
+    "title": "银河拱桥",
+    "location": "西藏阿里",
+    "category": "星空",
+    "description": "在海拔4500米的高原上，银河如同一座巨大的拱桥横跨天际。"
+  },
+  {
+    "id": "g5",
+    "thumb": "https://picsum.photos/seed/mountain2/400/400",
+    "full": "https://picsum.photos/seed/mountain2/1200/1200",
+    "title": "张家界天门山",
+    "location": "湖南张家界",
+    "category": "山川",
+    "description": "天门洞开，云雾缭绕，乘坐缆车穿越云层，感受大自然的鬼斧神工。"
+  },
+  {
+    "id": "g6",
+    "thumb": "https://picsum.photos/seed/city2/400/450",
+    "full": "https://picsum.photos/seed/city2/1200/1350",
+    "title": "重庆洪崖洞",
+    "location": "重庆渝中",
+    "category": "城市",
+    "description": "夜幕下的洪崖洞灯火通明，层层叠叠的吊脚楼依山而建，宛如现实版的千与千寻。"
+  },
+  {
+    "id": "g7",
+    "thumb": "https://picsum.photos/seed/ocean2/400/320",
+    "full": "https://picsum.photos/seed/ocean2/1200/960",
+    "title": "厦门鼓浪屿",
+    "location": "福建厦门",
+    "category": "大海",
+    "description": "碧蓝的大海一望无际，海风带着咸咸的味道拂面而来。"
+  },
+  {
+    "id": "g8",
+    "thumb": "https://picsum.photos/seed/stars2/400/500",
+    "full": "https://picsum.photos/seed/stars2/1200/1500",
+    "title": "漠河极光",
+    "location": "黑龙江漠河",
+    "category": "星空",
+    "description": "冬夜的漠河，绿色的极光在天空中舞动，像是宇宙为大地披上了一层神秘的面纱。"
+  },
+  {
+    "id": "g9",
+    "thumb": "https://picsum.photos/seed/mountain3/400/380",
+    "full": "https://picsum.photos/seed/mountain3/1200/1140",
+    "title": "稻城亚丁",
+    "location": "四川甘孜",
+    "category": "山川",
+    "description": "蓝色星球上的最后一片净土，雪山、草甸、海子构成了一幅绝美的画卷。"
+  },
+  {
+    "id": "g10",
+    "thumb": "https://picsum.photos/seed/city3/400/420",
+    "full": "https://picsum.photos/seed/city3/1200/1260",
+    "title": "故宫角楼夕阳",
+    "location": "北京故宫",
+    "category": "城市",
+    "description": "夕阳西下，故宫角楼在金色的光芒中熠熠生辉，六百年的沧桑尽在其中。"
+  },
+  {
+    "id": "g11",
+    "thumb": "https://picsum.photos/seed/ocean3/400/360",
+    "full": "https://picsum.photos/seed/ocean3/1200/1080",
+    "title": "涠洲岛日落",
+    "location": "广西北海",
+    "category": "大海",
+    "description": "太阳缓缓沉入海平面，天空被染成了橘红色，渔船的剪影定格在最美的瞬间。"
+  },
+  {
+    "id": "g12",
+    "thumb": "https://picsum.photos/seed/stars3/400/480",
+    "full": "https://picsum.photos/seed/stars3/1200/1440",
+    "title": "茶卡盐湖星轨",
+    "location": "青海茶卡",
+    "category": "星空",
+    "description": "盐湖如镜，倒映着满天星辰，长时间曝光下的星轨像是宇宙的年轮。"
+  }
+]
