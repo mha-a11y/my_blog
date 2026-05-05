@@ -42,7 +42,7 @@
     "content": "从 jQuery 时代到现在的 React/Vue 生态，前端工程化经历了翻天覆地的变化。\n\n早期的前端开发，一个 HTML 文件加一个 JS 文件就够了。后来有了模块化（AMD、CommonJS、ESM），有了构建工具（Grunt、Gulp、Webpack、Vite），有了框架（Backbone、Angular、React、Vue、Svelte）。\n\n每一次变革都是为了解决上一代的痛点。Webpack 解决了模块化问题，但配置复杂；Vite 利用 ESM 和 esbuild，让开发体验大幅提升。\n\n工具在变，但核心不变：让开发者专注于业务逻辑，而不是工程配置。"
   },
   {
-    "id": "id-1777978304974-eoz883",
+    "id": "id-1777978249701-kcouif",
     "title": "偶遇",
     "date": "2026-05-05",
     "tags": [],
