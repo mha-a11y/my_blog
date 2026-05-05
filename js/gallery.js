@@ -20,7 +20,10 @@
   function renderFilter() {
     if (!filterWrap) return;
     var cats = {};
-    allPhotos.forEach(function (p) { cats[p.category] = (cats[p.category] || 0) + 1; });
+    allPhotos.forEach(function (p) {
+      var cat = p.category || '未分类';
+      cats[cat] = (cats[cat] || 0) + 1;
+    });
 
     var html = '<button class="filter-btn ' + (!activeCategory ? 'active' : '') + '" data-cat="">全部</button>';
     Object.keys(cats).sort().forEach(function (cat) {
@@ -31,7 +34,7 @@
 
   function getFiltered() {
     if (!activeCategory) return allPhotos;
-    return allPhotos.filter(function (p) { return p.category === activeCategory; });
+    return allPhotos.filter(function (p) { return (p.category || '未分类') === activeCategory; });
   }
 
   function renderGrid() {
@@ -44,8 +47,9 @@
     }
 
     grid.innerHTML = filteredPhotos.map(function (photo, i) {
+      var imgSrc = photo.thumb || photo.full;
       return '<div class="masonry-item" data-index="' + i + '">' +
-        '<img src="' + window.escHtml(photo.thumb) + '" alt="' + window.escHtml(photo.title) + '" loading="lazy">' +
+        '<img src="' + window.escHtml(imgSrc) + '" alt="' + window.escHtml(photo.title) + '" loading="lazy">' +
         '<div class="masonry-overlay">' +
           '<h3>' + window.escHtml(photo.title) + '</h3>' +
           '<p>📍 ' + window.escHtml(photo.location) + '</p>' +
@@ -108,43 +112,35 @@
     window.openModal(
       isNew ? '添加照片' : '编辑照片',
       [
-        { name: 'title',       label: '标题',     type: 'text',     value: data.title },
-        { name: 'location',    label: '拍摄地点', type: 'text',     value: data.location },
-        { name: 'category',    label: '分类',     type: 'select',   value: data.category, options: categories },
-        { name: 'thumb',       label: '缩略图 URL', type: 'text',   value: data.thumb },
-        { name: 'full',        label: '大图 URL',   type: 'text',   value: data.full },
-        { name: 'description', label: '描述',     type: 'textarea', value: data.description }
+        { name: 'title',       label: '标题',       type: 'text',     value: data.title },
+        { name: 'location',    label: '拍摄地点',   type: 'text',     value: data.location },
+        { name: 'category',    label: '分类',       type: 'select',   value: data.category, options: categories },
+        { name: 'full',        label: '图片 URL（PicGo链接）', type: 'text', value: data.full || data.thumb },
+        { name: 'description', label: '描述',       type: 'textarea', value: data.description }
       ],
       function (formData) {
+        var url = formData.full.trim();
+        if (!url) { alert('请输入图片 URL'); return; }
+        var saveData = {
+          title: formData.title,
+          location: formData.location,
+          category: formData.category || '未分类',
+          thumb: url,
+          full: url,
+          description: formData.description
+        };
         if (isNew) {
-          var newItem = {
-            id: window.genId(),
-            title: formData.title,
-            location: formData.location,
-            category: formData.category,
-            thumb: formData.thumb,
-            full: formData.full,
-            description: formData.description
-          };
-          window.BlogData.create('gallery', newItem).then(function () {
-            allPhotos.push(newItem);
+          saveData.id = window.genId();
+          window.BlogData.create('gallery', saveData).then(function () {
+            allPhotos.push(saveData);
             window.BlogData.save('gallery', allPhotos);
             renderFilter();
             renderGrid();
           });
         } else {
-          window.BlogData.update('gallery', photo.id, {
-            title: formData.title,
-            location: formData.location,
-            category: formData.category,
-            thumb: formData.thumb,
-            full: formData.full,
-            description: formData.description
-          }).then(function () {
+          window.BlogData.update('gallery', photo.id, saveData).then(function () {
             allPhotos = allPhotos.map(function (p) {
-              if (p.id === photo.id) {
-                return { id: p.id, title: formData.title, location: formData.location, category: formData.category, thumb: formData.thumb, full: formData.full, description: formData.description };
-              }
+              if (p.id === photo.id) return Object.assign({ id: p.id }, saveData);
               return p;
             });
             window.BlogData.save('gallery', allPhotos);
