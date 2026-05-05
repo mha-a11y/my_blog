@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const { exec } = require('child_process');
 require('dotenv').config();
 
 const app = express();
@@ -26,6 +27,45 @@ function readJSON(file) {
 
 function writeJSON(file, data) {
   fs.writeFileSync(path.join(DATA_DIR, file), JSON.stringify(data, null, 2), 'utf-8');
+  // Persist to GitHub so data survives Railway restarts
+  pushToGitHub(file);
+}
+
+async function pushToGitHub(file) {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) return;
+  const repo = process.env.GITHUB_REPO || 'mha-a11y/my_blog';
+  const fp = 'data/' + file;
+  const content = fs.readFileSync(path.join(DATA_DIR, file), 'utf-8');
+  try {
+    // Get current file SHA (required for update)
+    const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${fp}`, {
+      headers: { 'Authorization': `Bearer ${token}`, 'User-Agent': 'my-blog' }
+    });
+    let sha = undefined;
+    if (getRes.ok) {
+      const info = await getRes.json();
+      sha = info.sha;
+    }
+    // Create or update file
+    const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${fp}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'User-Agent': 'my-blog'
+      },
+      body: JSON.stringify({
+        message: 'Auto-save ' + file,
+        content: Buffer.from(content).toString('base64'),
+        sha: sha
+      })
+    });
+    if (putRes.ok) console.log('[github-save]', file, 'persisted');
+    else console.error('[github-save] failed:', putRes.status, await putRes.text());
+  } catch (e) {
+    console.error('[github-save] error:', e.message);
+  }
 }
 
 // ========== AI Chat Proxy ==========
