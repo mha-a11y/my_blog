@@ -23,6 +23,7 @@
   var activeTab = 'chat'; // 'chat' | 'history'
   var searchQuery = '';
   var isAdmin = false;
+  var currentArchiveId = null;
 
   /* --- User ID (anonymous, per browser) --- */
   function getUserId() {
@@ -213,6 +214,11 @@
       return;
     }
 
+    if (currentArchiveId) {
+      alert('当前对话已自动保存到服务器，可在"历史记录"标签中查看。');
+      return;
+    }
+
     /* Generate title from first user message */
     var firstUser = currentMessages.find(function (m) { return m.role === 'user'; });
     var title = firstUser ? firstUser.content.substring(0, 30) : '对话记录';
@@ -226,7 +232,8 @@
       messages: currentMessages.slice()
     };
 
-    window.BlogData.create('chat-history', archive).then(function () {
+    window.BlogData.create('chat-history', archive).then(function (saved) {
+      currentArchiveId = saved.id;
       archives.push(archive);
       alert('对话已归档！可在"历史记录"标签中查看。');
     }).catch(function () {
@@ -308,14 +315,46 @@
   function getLocalHistory() {
     try {
       var data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
+      if (!data) return [];
+      var parsed = JSON.parse(data);
+      if (Array.isArray(parsed)) return parsed;
+      currentArchiveId = parsed.archiveId || null;
+      return parsed.messages || [];
     } catch (e) { return []; }
   }
 
   function saveLocalHistory(history) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-50)));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        messages: history.slice(-50),
+        archiveId: currentArchiveId
+      }));
     } catch (e) { /* ignore */ }
+  }
+
+  function autoSaveToServer() {
+    if (currentMessages.length === 0) return;
+
+    var firstUser = currentMessages.find(function (m) { return m.role === 'user'; });
+    var title = firstUser ? firstUser.content.substring(0, 30) : '对话记录';
+    if (firstUser && firstUser.content.length > 30) title += '...';
+
+    var payload = {
+      userId: getUserId(),
+      title: title,
+      date: window.toLocalISOString(),
+      messages: currentMessages.slice()
+    };
+
+    if (currentArchiveId) {
+      window.BlogData.update('chat-history', currentArchiveId, payload).catch(function () {});
+    } else {
+      payload.id = window.genId();
+      window.BlogData.create('chat-history', payload).then(function (saved) {
+        currentArchiveId = saved.id;
+        saveLocalHistory(currentMessages);
+      }).catch(function () {});
+    }
   }
 
   function renderMessage(role, content) {
@@ -468,6 +507,7 @@
 
     currentMessages.push({ role: 'ai', content: aiContent });
     saveLocalHistory(currentMessages);
+    autoSaveToServer();
   }
 
   function autoResizeInput(el) {
