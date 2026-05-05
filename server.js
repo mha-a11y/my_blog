@@ -33,13 +33,14 @@ function writeJSON(file, data) {
 
 async function pushToGitHub(file) {
   const token = process.env.GITHUB_TOKEN;
-  if (!token) return;
+  if (!token) { console.log('[github-save] no GITHUB_TOKEN, skipping'); return; }
   const repo = process.env.GITHUB_REPO || 'mha-a11y/my_blog';
   const fp = 'data/' + file;
   const content = fs.readFileSync(path.join(DATA_DIR, file), 'utf-8');
   try {
+    const { default: fetchFn } = await import('node-fetch');
     // Get current file SHA (required for update)
-    const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${fp}`, {
+    const getRes = await fetchFn(`https://api.github.com/repos/${repo}/contents/${fp}`, {
       headers: { 'Authorization': `Bearer ${token}`, 'User-Agent': 'my-blog' }
     });
     let sha = undefined;
@@ -48,7 +49,7 @@ async function pushToGitHub(file) {
       sha = info.sha;
     }
     // Create or update file
-    const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${fp}`, {
+    const putRes = await fetchFn(`https://api.github.com/repos/${repo}/contents/${fp}`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
