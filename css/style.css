@@ -1271,9 +1271,9 @@ body.is-admin .admin-only-block {
    GitHub Section
    ============================================================ */
 .github-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
   max-height: 750px;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -1922,7 +1922,8 @@ body.is-admin .admin-only-block {
   .masonry { columns: 2; column-gap: 10px; }
   .masonry-item { margin-bottom: 10px; }
 
-  /* GitHub — now single column by default */
+  /* GitHub */
+  .github-grid { grid-template-columns: 1fr; }
 
   /* Guestbook */
   .guestbook-form-row {
