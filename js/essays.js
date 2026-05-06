@@ -22,12 +22,14 @@
     }
 
     var html = '<div class="archive-title">归档</div>';
+    html += '<div class="archive-list">';
     html += '<button class="archive-btn ' + (!activeMonth ? 'active' : '') + '" data-month="">全部 (' + allEssays.length + ')</button>';
     groups.forEach(function (g) {
       var count = g.items.length;
       html += '<button class="archive-btn ' + (activeMonth === g.label ? 'active' : '') +
               '" data-month="' + g.label + '">' + window.monthLabel(g.label) + ' (' + count + ')</button>';
     });
+    html += '</div>';
     archiveEl.innerHTML = html;
   }
 

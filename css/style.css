@@ -1045,6 +1045,19 @@ body.is-admin .admin-only-block {
 .masonry {
   columns: 3;
   column-gap: 16px;
+  max-height: 750px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.masonry::-webkit-scrollbar {
+  width: 5px;
+}
+
+.masonry::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
 }
 
 .masonry-item {
@@ -1258,9 +1271,22 @@ body.is-admin .admin-only-block {
    GitHub Section
    ============================================================ */
 .github-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 750px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.github-grid::-webkit-scrollbar {
+  width: 5px;
+}
+
+.github-grid::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
 }
 
 .repo-card {
@@ -1896,8 +1922,7 @@ body.is-admin .admin-only-block {
   .masonry { columns: 2; column-gap: 10px; }
   .masonry-item { margin-bottom: 10px; }
 
-  /* GitHub */
-  .github-grid { grid-template-columns: 1fr; }
+  /* GitHub — now single column by default */
 
   /* Guestbook */
   .guestbook-form-row {
@@ -1925,6 +1950,19 @@ body.is-admin .admin-only-block {
 .essays-list {
   flex: 1;
   min-width: 0;
+  max-height: 750px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.essays-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.essays-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
 }
 
 .essays-archive {

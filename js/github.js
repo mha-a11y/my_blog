@@ -16,6 +16,39 @@
   };
 
   var allRepos = [];
+  var activeMonth = null;
+
+  /* --- Archive sidebar (month filter) --- */
+  function renderArchive() {
+    var groups = window.groupByMonth(allRepos, 'updated');
+    var archiveEl = document.getElementById('github-archive');
+    if (!archiveEl) return;
+
+    if (groups.length === 0) {
+      archiveEl.innerHTML = '';
+      return;
+    }
+
+    var html = '<div class="archive-title">归档</div>';
+    html += '<div class="archive-list">';
+    html += '<button class="archive-btn ' + (!activeMonth ? 'active' : '') + '" data-month="">全部 (' + allRepos.length + ')</button>';
+    groups.forEach(function (g) {
+      var count = g.items.length;
+      html += '<button class="archive-btn ' + (activeMonth === g.label ? 'active' : '') +
+              '" data-month="' + g.label + '">' + window.monthLabel(g.label) + ' (' + count + ')</button>';
+    });
+    html += '</div>';
+    archiveEl.innerHTML = html;
+  }
+
+  function getFiltered() {
+    if (!activeMonth) return allRepos;
+    return allRepos.filter(function (r) {
+      var d = new Date(r.updated);
+      var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      return key === activeMonth;
+    });
+  }
 
   function timeAgo(dateStr) {
     var diff = Date.now() - new Date(dateStr).getTime();
@@ -34,20 +67,22 @@
 
   function render(repos) {
     allRepos = repos;
+    renderArchive();
     renderList();
   }
 
   function renderList() {
     if (!container) return;
+    var repos = getFiltered();
 
-    if (allRepos.length === 0) {
+    if (repos.length === 0) {
       container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem;grid-column:1/-1">还没有仓库，点击上方按钮添加 📦</p>';
       return;
     }
 
-    allRepos.sort(function (a, b) { return new Date(b.updated) - new Date(a.updated); });
+    repos.sort(function (a, b) { return new Date(b.updated) - new Date(a.updated); });
 
-    container.innerHTML = allRepos.map(function (repo) {
+    container.innerHTML = repos.map(function (repo) {
       var color = LANG_COLORS[repo.language] || '#999';
 
       return '<article class="repo-card card" data-id="' + repo.id + '">' +
@@ -103,6 +138,7 @@
           window.BlogData.create('github', newItem).then(function () {
             allRepos.push(newItem);
             window.BlogData.save('github', allRepos);
+            renderArchive();
             renderList();
           });
         } else {
@@ -122,6 +158,7 @@
               return r;
             });
             window.BlogData.save('github', allRepos);
+            renderArchive();
             renderList();
           });
         }
@@ -147,6 +184,7 @@
           window.BlogData.remove('github', id).then(function () {
             allRepos = allRepos.filter(function (r) { return r.id !== id; });
             window.BlogData.save('github', allRepos);
+            renderArchive();
             renderList();
           });
         }
@@ -156,6 +194,18 @@
 
   if (addBtn) {
     addBtn.addEventListener('click', function () { if (window.requireAdmin()) openEditor(null); });
+  }
+
+  /* Archive filter delegation */
+  var archiveContainer = document.getElementById('github-archive');
+  if (archiveContainer) {
+    archiveContainer.addEventListener('click', function (e) {
+      var btn = e.target.closest('.archive-btn');
+      if (!btn) return;
+      activeMonth = btn.getAttribute('data-month') || null;
+      renderArchive();
+      renderList();
+    });
   }
 
   window.BlogData.load('github', 'data/github.json', render);
