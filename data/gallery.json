@@ -106,5 +106,14 @@
     "location": "青海茶卡",
     "category": "星空",
     "description": "盐湖如镜，倒映着满天星辰，长时间曝光下的星轨像是宇宙的年轮。"
+  },
+  {
+    "title": "夕阳",
+    "location": "",
+    "category": "山川",
+    "thumb": "https://raw.githubusercontent.com/mha-a11y/my-picture/main/微信图片_20260506220837_1045_39.jpg",
+    "full": "https://raw.githubusercontent.com/mha-a11y/my-picture/main/微信图片_20260506220837_1045_39.jpg",
+    "description": "",
+    "id": "id-1778076583823-vfujcj"
   }
 ]
