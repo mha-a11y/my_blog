@@ -1,14 +1,5 @@
 [
   {
-    "id": "g1",
-    "thumb": "https://picsum.photos/seed/mountain1/400/500",
-    "full": "https://picsum.photos/seed/mountain1/1200/1500",
-    "title": "云海翻涌的黄山",
-    "location": "安徽黄山",
-    "category": "山川",
-    "description": "清晨站在光明顶，看着云海在脚下翻涌，远处的山峰若隐若现，仿佛置身仙境。"
-  },
-  {
     "id": "g2",
     "thumb": "https://picsum.photos/seed/city1/400/300",
     "full": "https://picsum.photos/seed/city1/1200/900",
